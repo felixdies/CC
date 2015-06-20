@@ -1,0 +1,6 @@
+﻿usage: CC <command> [<args>]
+
+CC commands are:
+    list    해당 브렌치로 check-in 되었던 파일 목록을 보여 줍니다.
+    tree    CC 의 version tree 를 보여 줍니다.
+    label   CC 에서 작업한 파일들에 대하여, main 브랜치 마지막 버전에 레이블을 붙입니다.
