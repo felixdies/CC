@@ -26,6 +26,7 @@ namespace CC
 			}
 			set { _executingPath = value; }
 		}
+
 		public string OutPath
 		{
 			get
@@ -40,6 +41,7 @@ namespace CC
 			}
 			set { _outPath = value; }
 		}
+
 		public string LogPath
 		{
 			get

@@ -51,14 +51,11 @@ namespace CC
 			}
 		}
 
-
-		internal string BranchName { get; set; }
-
+		string VobPath { get; set; }
 		protected string ExecutingPath { get; set; }
 		protected string OutPath { get; set; }
 		protected string LogPath { get; set; }
-
-		string VobPath { get; set; }
+		internal string BranchName { get; set; }
 
 		internal string CurrentView
 		{
