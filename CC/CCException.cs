@@ -6,10 +6,10 @@ using System.Threading.Tasks;
 
 namespace CC
 {
-	public class CCException : Exception
-	{
-		public CCException() { }
+  public class CCException : Exception
+  {
+    public CCException() { }
 
-		public CCException(string message) : base(message) { }
-	}
+    public CCException(string message) : base(message) { }
+  }
 }

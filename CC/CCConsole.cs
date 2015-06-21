@@ -6,102 +6,102 @@ using System.Threading.Tasks;
 
 namespace CC
 {
-	public class CCConsole
-	{
-		static void Main(string[] args)
-		{
-			if (args.Length == 0)
-			{
-				WriteLine(Usage.Main);
-				return;
-			}
+  public class CCConsole
+  {
+    static void Main(string[] args)
+    {
+      if (args.Length == 0)
+      {
+        WriteLine(Usage.Main);
+        return;
+      }
 
-			switch (args[0].ToLower())
-			{
-				case "list":
-					if (args.Length < 2)
-					{
-						WriteLine(Usage.List);
-						return;
-					}
-					new ClearTool(Environment.CurrentDirectory, args[1]).ListCCFilesOnBranch()
-						.ForEach(file => WriteLine(file));
-					break;
+      switch (args[0].ToLower())
+      {
+        case "list":
+          if (args.Length < 2)
+          {
+            WriteLine(Usage.List);
+            return;
+          }
+          new ClearTool(Environment.CurrentDirectory, args[1]).ListCCFilesOnBranch()
+            .ForEach(file => WriteLine(file));
+          break;
 
-				case "tree":
-					if (args.Length < 2)
-					{
-						WriteLine(Usage.Tree);
-						return;
-					}
-					new ClearTool(Environment.CurrentDirectory, args[1]).ViewCCVersionTrees();
-					break;
+        case "tree":
+          if (args.Length < 2)
+          {
+            WriteLine(Usage.Tree);
+            return;
+          }
+          new ClearTool(Environment.CurrentDirectory, args[1]).ViewCCVersionTrees();
+          break;
 
-				case "label":
-					Label(args);
-					break;
+        case "label":
+          Label(args);
+          break;
 
-				case "cs":
-					ConfigSpec(args);
-					break;
+        case "cs":
+          ConfigSpec(args);
+          break;
 
-				default:
-					WriteLine(Usage.Main);
-					return;
-			}
-		}
+        default:
+          WriteLine(Usage.Main);
+          return;
+      }
+    }
 
-		static private void Label(string[] args)
-		{
-			if (args.Length < 4)
-			{
-				WriteLine(Usage.Label);
-				return;
-			}
+    static private void Label(string[] args)
+    {
+      if (args.Length < 4)
+      {
+        WriteLine(Usage.Label);
+        return;
+      }
 
-			string labeledBranch;
+      string labeledBranch;
 
-			switch (args[1].ToLower())
-			{
-				case "-main":
-				case "-m":
-					labeledBranch = "main";
-					break;
+      switch (args[1].ToLower())
+      {
+        case "-main":
+        case "-m":
+          labeledBranch = "main";
+          break;
 
-				case "-branch":
-				case "-b":
-					labeledBranch = "main\\" + args[2];
-					break;
+        case "-branch":
+        case "-b":
+          labeledBranch = "main\\" + args[2];
+          break;
 
-				default:
-					WriteLine(Usage.Label);
-					return;
-			}
+        default:
+          WriteLine(Usage.Label);
+          return;
+      }
 
-			new ClearTool(Environment.CurrentDirectory, args[2]).LabelLastElements(labeledBranch, args[3]);
-		}
+      new ClearTool(Environment.CurrentDirectory, args[2]).LabelLastElements(labeledBranch, args[3]);
+    }
 
-		static private void ConfigSpec(string[] args)
-		{
-			switch (args.Length)
-			{
-				case 2:
-					WriteLine(new ClearTool(Environment.CurrentDirectory).CatCS());
-					break;
+    static private void ConfigSpec(string[] args)
+    {
+      switch (args.Length)
+      {
+        case 2:
+          WriteLine(new ClearTool(Environment.CurrentDirectory).CatCS());
+          break;
 
-				case 3:
-					new ClearTool(Environment.CurrentDirectory, args[2]).SetBranchCS();
-					break;
+        case 3:
+          new ClearTool(Environment.CurrentDirectory, args[2]).SetBranchCS();
+          break;
 
-				default:
-					WriteLine(Usage.CS);
-					return;
-			}
-		}
+        default:
+          WriteLine(Usage.CS);
+          return;
+      }
+    }
 
-		static void WriteLine(string value)
-		{
-			System.Console.WriteLine(value);
-		}
-	}
+    static void WriteLine(string value)
+    {
+      System.Console.WriteLine(value);
+    }
+  }
 }
