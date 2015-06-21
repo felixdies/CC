@@ -10,12 +10,12 @@ namespace CC
 {
 	public class Logger
 	{
-		public string LogPath { get; set; }
-
 		public Logger(string logPath)
 		{
 			this.LogPath = logPath;
 		}
+
+		private string LogPath { get; set; }
 
 		public void Write(string text)
 		{

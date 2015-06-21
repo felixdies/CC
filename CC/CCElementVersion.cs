@@ -10,6 +10,17 @@ namespace CC
 {
 	public class CCElementVersion
 	{
+		public CCElementVersion()
+		{
+		}
+
+		public CCElementVersion(string versionInfo)
+		{
+			ParseFileInfo(versionInfo);
+		}
+		
+		public string RootPath { get; set; }
+
 		public string Attributes { get; set; }
 		public string Comment { get; set; }
 		public DateTime CreatedDate { get; set; }
@@ -19,20 +30,18 @@ namespace CC
 		public string IndentLevel { get; set; }
 		public string Labels { get; set; }
 		public string ObjectKind { get; set; }
-		/// <summary> VOB path 로부터의 상대 경로 </summary>
+		/// <summary> Rootpath 로부터의 상대 경로 </summary>
 		public string ElementName { get; set; }
 		public string Version { get; set; }
 		public string PredecessorVersion { get; set; }
 		public string Operation { get; set; }
 		public string Type { get; set; }
-		public string SymbolicLink { get; set; }
+		public string SymbolicLinkAbsPath { get; set; }
 		public string OwnerLoginName { get; set; }
 		public string OwnerFullName { get; set; }
 		public string HyperLinkInfo { get; set; }
 
-		public string VobPath { get; set; }
-
-		public string Branch
+		private string Branch
 		{
 			get
 			{
@@ -41,32 +50,11 @@ namespace CC
 			}
 		}
 
-		// Grouping operations
-		public int OperationGroup
-		{
-			get
-			{
-				if (Operation == "rmver" || Operation == "rmhlink") // revert
-					return -1;
-				else // commit : "checkin", "mkelem", "rmelem", ...
-					return 0;
-			}
-		}
+		private CCElementVersion Predecessor { get; set; }
+		private CCElementVersion HyperLinkedFrom { get; set; }
+		private CCElementVersion HyperLinkedTo { get; set; }
 
-		public CCElementVersion Predecessor { get; set; }
-		public CCElementVersion HyperLinkedFrom { get; set; }
-		public CCElementVersion HyperLinkedTo { get; set; }
-
-		internal CCElementVersion()
-		{
-		}
-
-		internal CCElementVersion(string versionInfo)
-		{
-			ParseFileInfo(versionInfo);
-		}
-
-		internal void ParseFileInfo(string versionInfo)
+		private void ParseFileInfo(string versionInfo)
 		{
 			List<string> versionInfoList = versionInfo.Split('|').ToList();
 			Dictionary<string, string> versionInfoDic = new Dictionary<string, string>();
@@ -92,7 +80,7 @@ namespace CC
 			CreatedDate = DateTime.Parse(versionInfoDic["CreatedDate"]);
 
 			if (versionInfoDic.ContainsKey("SymbolicLink"))
-				SymbolicLink = Path.GetFullPath((new Uri(Path.Combine(VobPath, versionInfoDic["SymbolicLink"]))).LocalPath);
+				SymbolicLinkAbsPath = Path.GetFullPath((new Uri(Path.Combine(RootPath, versionInfoDic["SymbolicLink"]))).LocalPath);
 		}
 	}
 }

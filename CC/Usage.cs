@@ -19,6 +19,5 @@ namespace CC
 
     public static string Label
     { get { return ResourceHandler.GetResource("usage_label.txt"); } }
-
 	}
 }

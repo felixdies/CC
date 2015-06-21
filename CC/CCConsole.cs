@@ -24,7 +24,7 @@ namespace CC
 						WriteLine(Usage.List);
 						return;
 					}
-					new CC(Environment.CurrentDirectory).ListCCFilesOnBranch(args[1])
+					new ClearTool(Environment.CurrentDirectory, args[1]).ListCCFilesOnBranch()
 						.ForEach(file => WriteLine(file));
 					break;
 
@@ -34,11 +34,15 @@ namespace CC
 						WriteLine(Usage.Tree);
 						return;
 					}
-					new CC(Environment.CurrentDirectory).ViewCCVersionTrees(args[1]);
+					new ClearTool(Environment.CurrentDirectory, args[1]).ViewCCVersionTrees();
 					break;
 
 				case "label":
 					Label(args);
+					break;
+
+				case "cs":
+					ConfigSpec(args);
 					break;
 
 				default:
@@ -74,7 +78,16 @@ namespace CC
 					return;
 			}
 
-			new CC(Environment.CurrentDirectory).LabelLastElements(args[2], labeledBranch, args[3]);
+			new ClearTool(Environment.CurrentDirectory, args[2]).LabelLastElements(labeledBranch, args[3]);
+		}
+
+		static private void ConfigSpec(string[] args)
+		{
+			if (args.Length == 2)
+			{
+				List<string> cs = new ClearTool(Environment.CurrentDirectory).CatCS();
+				cs.ForEach(spec => WriteLine(spec));
+			}
 		}
 
 		static void WriteLine(string value)

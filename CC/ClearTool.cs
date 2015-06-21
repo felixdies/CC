@@ -9,22 +9,32 @@ using System.Diagnostics;
 
 namespace CC
 {
-	class ClearTool
+	public class ClearTool
 	{
-		/// <summary>
-		/// Label, Tree 명령어 실행 시 사용
-		/// </summary>
-		/// <param name="constructInfo"></param>
-		public ClearTool(ClearToolConstructInfo constructInfo)
+		public ClearTool(string executingPath)
 		{
-			this.BranchName = constructInfo.BranchName;
-
-			this.ExecutingPath = constructInfo.ExecutingPath;
-			this.OutPath = constructInfo.OutPath;
-			this.LogPath = constructInfo.LogPath;
+			this.ExecutingPath = executingPath;
 		}
 
-		string Fmt
+		public ClearTool(string executingPath, string branchName)
+		{
+			this.ExecutingPath = executingPath;
+			this.BranchName = branchName;
+		}
+
+		private string ExecutingPath { get; set; }
+		private string BranchName { get; set; }
+		private string OutPath
+		{ 
+			get { return Path.Combine(ExecutingPath, "ccout.txt"); } 
+		}
+		private string LogPath
+		{
+			get { return Path.Combine(ExecutingPath, "cclog.txt"); } 
+		}
+		private string VobPath { get; set; }
+
+		private string Fmt
 		{
 			get
 			{
@@ -51,18 +61,42 @@ namespace CC
 			}
 		}
 
-		string VobPath { get; set; }
-		protected string ExecutingPath { get; set; }
-		protected string OutPath { get; set; }
-		protected string LogPath { get; set; }
-		internal string BranchName { get; set; }
+		public List<string> ListCCFilesOnBranch()
+		{
+			return FindAllFilesInBranch();
+		}
 
-		internal string CurrentView
+		public void ViewCCVersionTrees()
+		{
+			FindAllFilesInBranch().ForEach(filePath => ViewVersionTree(filePath));
+		}
+
+		public void LabelLastElements(string labeledBranch, string label)
+		{
+			// todo: validate label
+
+			FindAllFilesInBranch()
+				.Where(filePath => IsLabelingTargetExtension(filePath)).ToList()
+				.ForEach(filePath => LabelLatestElement(filePath, labeledBranch, label));
+		}
+
+		public List<string> CatCS()
+		{
+			return GetExecutedResultList("catcs");
+		}
+
+		private bool IsLabelingTargetExtension(string filePath)
+		{
+			List<string> targetExtension = new List<string>(new string[] { ".aspx", ".ascx", ".js", ".sql" });
+			return targetExtension.Contains(Path.GetExtension(filePath.Split('@')[0]));
+		}
+
+		private string CurrentView
 		{
 			get { return GetExecutedResult("pwv").Split(' ')[3]; }
 		}
 
-		internal string LogInUser
+		private string LogInUser
 		{
 			get
 			{
@@ -71,12 +105,12 @@ namespace CC
 			}
 		}
 
-		internal string LogInUserName
+		private string LogInUserName
 		{
 			get { return LogInUser.Split('\\').Last(); }
 		}
 
-		internal void CheckCheckedoutFileIsNotExist()
+		private void CheckCheckedoutFileIsNotExist()
 		{
 			List<string> checkedoutFileList = LscheckoutInCurrentViewByLoginUser();
 			if (checkedoutFileList.Count > 0)
@@ -88,29 +122,24 @@ namespace CC
 			}
 		}
 
-		internal void CheckAllSymbolicLinksAreMounted()
+		private void CheckAllSymbolicLinksAreMounted()
 		{
 			List<CCElementVersion> slinkList = FindAllSymbolicLinks();
 
 			foreach (CCElementVersion link in slinkList)
 			{
-				if (!System.IO.Directory.Exists(link.SymbolicLink))
-					throw new CCException(link.SymbolicLink + " VOB 이 mount 되지 않았습니다.");
+				if (!System.IO.Directory.Exists(link.SymbolicLinkAbsPath))
+					throw new CCException(link.SymbolicLinkAbsPath + " VOB 이 mount 되지 않았습니다.");
 			}
 		}
 
-		internal List<string> CatCS()
-		{
-			return GetExecutedResultList("catcs");
-		}
-
-		internal void SetCS(string[] configSpec)
+		private void SetCS(string[] configSpec)
 		{
 			File.WriteAllLines(OutPath, configSpec);
 			Execute("setcs " + OutPath);
 		}
 
-		internal void SetBranchCS()
+		private void SetBranchCS()
 		{
 			string[] branchCS = new string[]{
 				"element * CHECKEDOUT"
@@ -122,7 +151,7 @@ namespace CC
 			SetCS(branchCS);
 		}
 
-		internal void SetBranchCS(DateTime time)
+		private void SetBranchCS(DateTime time)
 		{
 			string[] branchCS = new string[] {
 				"time " + time.ToString()
@@ -136,12 +165,12 @@ namespace CC
 			SetCS(branchCS);
 		}
 
-		internal void SetDefaultCS()
+		private void SetDefaultCS()
 		{
 			Execute("setcs -default");
 		}
 
-		public List<string> FindAllFilesInBranch()
+		private List<string> FindAllFilesInBranch()
 		{
       string args = string.Empty;
 			
@@ -151,7 +180,7 @@ namespace CC
 			return GetExecutedResultList("find . " + args + " -print");
 		}
 
-		public List<string> FindAllFilesInBranch(DateTime since, DateTime until)
+		private List<string> FindAllFilesInBranch(DateTime since, DateTime until)
 		{
 			string args = string.Empty;
 
@@ -163,17 +192,17 @@ namespace CC
 			return GetExecutedResultList("find . " + args + " -print");
 		}
 
-    public void ViewVersionTree(string filePath)
+    private void ViewVersionTree(string filePath)
     {
 			Execute("lsvtree -graphical " + filePath + "\\LATEST", false);
     }
 
-    public void LabelLatestElement(string filePath, string branch, string label)
+    private void LabelLatestElement(string filePath, string branch, string label)
     {
 			Execute("mklabel -replace -version \\" + branch + "\\LATEST " + label + " " + filePath, false);
     }
 
-		internal List<CCElementVersion> FindAllSymbolicLinks()
+		private List<CCElementVersion> FindAllSymbolicLinks()
 		{
 			List<CCElementVersion> resultSLinkList = new List<CCElementVersion>();
 			List<string> foundSLinkList;
@@ -185,69 +214,69 @@ namespace CC
 			return resultSLinkList;
 		}
 
-		internal List<CCElementVersion> Lshistory(string pname)
+		private List<CCElementVersion> Lshistory(string pname)
 		{
 			List<CCElementVersion> resultList = new List<CCElementVersion>();
 
 			GetExecutedResultList("lshistory -fmt " + Fmt + " " + pname)
 				.ForEach(elemVersion => resultList.Add(
-					new CCElementVersion(elemVersion) { VobPath = this.VobPath })
+					new CCElementVersion(elemVersion) { RootPath = this.ExecutingPath })
 					);
 
 			return resultList;
 		}
 
-		internal List<CCElementVersion> Lshistory(string pname, DateTime since)
+		private List<CCElementVersion> Lshistory(string pname, DateTime since)
 		{
 			List<CCElementVersion> resultList = new List<CCElementVersion>();
 
 			GetExecutedResultList("lshistory -fmt " + Fmt + " -since" + since.AddSeconds(1) + " " + pname)
 				.ForEach(elemVersion => resultList.Add(
-					new CCElementVersion(elemVersion){ VobPath = this.VobPath })
+					new CCElementVersion(elemVersion) { RootPath = this.ExecutingPath })
 					);
 
 			return resultList;
 		}
 
-		internal CCElementVersion Describe(string pname)
+		private CCElementVersion Describe(string pname)
 		{
 			string description = GetExecutedResult("describe -fmt " + Fmt + " " + pname);
-			return new CCElementVersion(description) { VobPath = this.VobPath }; 
+			return new CCElementVersion(description) { RootPath = this.ExecutingPath }; 
 		}
 
-		internal string Pwd()
+		private string Pwd()
 		{
 			return GetExecutedResult("pwd");
 		}
 
-		internal List<string> LscheckoutInCurrentViewByLoginUser()
+		private List<string> LscheckoutInCurrentViewByLoginUser()
 		{
 			return GetExecutedResultList("lscheckout -short -cview -me -recurse");
 		}
 
 		// vob path 의 상위 디렉터리에서 mount 를 실행해야 한다.
-		internal void Mount(string vobTag)
+		private void Mount(string vobTag)
 		{
 			Execute("mount \\" + vobTag);
 		}
 
 		// vob path 의 상위 디렉터리에서 umount 를 실행해야 한다.
-		internal void UMount(string vobTag)
+		private void UMount(string vobTag)
 		{
 			Execute("umount \\" + vobTag);
 		}
 
-		internal void Checkout(string pname)
+		private void Checkout(string pname)
 		{
 			Execute("checkout -ncomment " + pname);
 		}
 
-		internal void Uncheckout(string pname)
+		private void Uncheckout(string pname)
 		{
 			Execute("uncheckout -keep " + pname);
 		}
 
-		protected string Command
+		private string Command
 		{
 			get {
 				ProcessStartInfo proInfo = new ProcessStartInfo()
@@ -271,7 +300,7 @@ namespace CC
 			}
 		}
 
-		protected void Execute(string arg, bool wait = true)
+		private void Execute(string arg, bool wait = true)
 		{
 			Process proc = new Process();
 			ProcessStartInfo proInfo = new ProcessStartInfo()
@@ -299,13 +328,13 @@ namespace CC
 			}
 		}
 
-		protected string GetExecutedResult(string arg)
+		private string GetExecutedResult(string arg)
 		{
 			Execute(arg + " > '" + OutPath + "'");
 			return File.ReadAllText(OutPath);
 		}
 
-		protected List<string> GetExecutedResultList(string arg)
+		private List<string> GetExecutedResultList(string arg)
 		{
 			Execute(arg + " > '" + OutPath + "'");
 			return File.ReadAllLines(OutPath).ToList();
