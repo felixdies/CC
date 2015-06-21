@@ -80,9 +80,21 @@ namespace CC
 				.ForEach(filePath => LabelLatestElement(filePath, labeledBranch, label));
 		}
 
-		public List<string> CatCS()
+		public string CatCS()
 		{
-			return GetExecutedResultList("catcs");
+			return GetExecutedResult("catcs");
+		}
+
+		public void SetBranchCS()
+		{
+			string[] branchCS = new string[]{
+				"element * CHECKEDOUT"
+				, "element -dir * /main/LATEST"
+				, "element -file * /main/" + BranchName + "/LATEST"
+				, "element -file * /main/LATEST -mkbranch " + BranchName
+			};
+
+			SetCS(branchCS);
 		}
 
 		private bool IsLabelingTargetExtension(string filePath)
@@ -137,18 +149,6 @@ namespace CC
 		{
 			File.WriteAllLines(OutPath, configSpec);
 			Execute("setcs " + OutPath);
-		}
-
-		private void SetBranchCS()
-		{
-			string[] branchCS = new string[]{
-				"element * CHECKEDOUT"
-				, "element -dir * /main/LATEST"
-				, "element -file * /main/" + BranchName + "/LATEST"
-				, "element -file * /main/LATEST -mkbranch " + BranchName
-			};
-
-			SetCS(branchCS);
 		}
 
 		private void SetBranchCS(DateTime time)

@@ -83,10 +83,18 @@ namespace CC
 
 		static private void ConfigSpec(string[] args)
 		{
-			if (args.Length == 2)
+			switch (args.Length)
 			{
-				List<string> cs = new ClearTool(Environment.CurrentDirectory).CatCS();
-				cs.ForEach(spec => WriteLine(spec));
+				case 2:
+					WriteLine(new ClearTool(Environment.CurrentDirectory).CatCS());
+					break;
+
+				case 3:
+					new ClearTool(Environment.CurrentDirectory, args[2]).SetBranchCS();
+					break;
+
+				default:
+					return;
 			}
 		}
 
