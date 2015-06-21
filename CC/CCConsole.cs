@@ -94,6 +94,7 @@ namespace CC
 					break;
 
 				default:
+					WriteLine(Usage.CS);
 					return;
 			}
 		}
