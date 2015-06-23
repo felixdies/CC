@@ -85,11 +85,11 @@ namespace CC
     {
       switch (args.Length)
       {
-        case 2:
+        case 1:
           WriteLine(new ClearTool(Environment.CurrentDirectory).CatCS());
           break;
 
-        case 3:
+        case 2:
           new ClearTool(Environment.CurrentDirectory, args[2]).SetBranchCS();
           break;
 
